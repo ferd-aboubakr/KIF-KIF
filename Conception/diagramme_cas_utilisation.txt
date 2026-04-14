@@ -1,0 +1,117 @@
+# Diagramme de Cas d'Utilisation - Plateforme Kif-Kif
+
+## Acteurs
+- **ResponsableTPME** : Représente les très petites et moyennes entreprises marocaines
+- **AdministrateurKifKif** : Gère et modère la plateforme
+
+## Cas d'Utilisation
+
+### Gestion du Compte
+```
+ResponsableTPME -- (S'inscrire)
+ResponsableTPME -- (Se connecter)
+ResponsableTPME -- (Gérer profil entreprise)
+ResponsableTPME -- (Réinitialiser mot de passe)
+```
+
+### Gestion des Ressources
+```
+ResponsableTPME -- (Déposer annonce ressource)
+ResponsableTPME -- (Consulter marketplace)
+ResponsableTPME -- (Rechercher ressources)
+ResponsableTPME -- (Contacter vendeur)
+ResponsableTPME -- (Réserver ressource)
+ResponsableTPME -- (Gérer mes annonces)
+```
+
+### Tableau de Bord
+```
+ResponsableTPME -- (Voir métriques circulaires)
+ResponsableTPME -- (Consulter historique transactions)
+ResponsableTPME -- (Voir état annonces)
+```
+
+### Administration
+```
+AdministrateurKifKif -- (Valider entreprises)
+AdministrateurKifKif -- (Modérer annonces)
+AdministrateurKifKif -- (Voir statistiques globales)
+AdministrateurKifKif -- (Générer rapports d'impact)
+AdministrateurKifKif -- (Suivre flux ressources)
+```
+
+## Relations
+
+### <<include>>
+- (Se connecter) <<include>> (Gérer profil entreprise)
+- (Déposer annonce ressource) <<include>> (Gérer mes annonces)
+- (Voir statistiques globales) <<include>> (Générer rapports d'impact)
+
+### <<extend>>
+- (Contacter vendeur) <<extend>> (Réserver ressource)
+
+## Description Détaillée des Cas d'Utilisation
+
+### UC1: S'inscrire
+- **Acteur** : ResponsableTPME
+- **Description** : Création d'un compte entreprise avec validation
+- **Préconditions** : Aucune
+- **Postconditions** : Compte créé avec statut "En attente de validation"
+- **Flux principal** :
+  1. Saisir nom de l'entreprise
+  2. Saisir ICE
+  3. Saisir secteur d'activité
+  4. Saisir ville
+  5. Saisir coordonnées contact
+  6. Valider l'inscription
+
+### UC2: Déposer annonce ressource
+- **Acteur** : ResponsableTPME
+- **Description** : Publication d'une ressource à vendre/échanger
+- **Préconditions** : Connecté et entreprise validée
+- **Postconditions** : Annonce publiée et visible dans marketplace
+- **Flux principal** :
+  1. Sélectionner type de ressource
+  2. Décrire la ressource
+  3. Indiquer quantité et état
+  4. Fixer prix
+  5. Préciser localisation
+  6. Publier l'annonce
+
+### UC3: Valider entreprises
+- **Acteur** : AdministrateurKifKif
+- **Description** : Vérification et validation des entreprises inscrites
+- **Préconditions** : Connecté en tant qu'administrateur
+- **Postconditions** : Statut de l'entreprise mis à jour
+- **Flux principal** :
+  1. Consulter liste entreprises en attente
+  2. Vérifier informations ICE
+  3. Approuver ou rejeter l'entreprise
+  4. Notifier le ResponsableTPME
+
+## Diagramme Textuel
+
+```
+                    +------------------------+
+                    |   Plateforme Kif-Kif   |
+                    +------------------------+
+                              |
+      +-----------------------+-----------------------+
+      |                                               |
++-------------+                               +-------------+
+| Responsable |                               | Administrateur|
+|    TPME     |                               |   Kif-Kif    |
++-------------+                               +-------------+
+      |                                               |
+      |---(S'inscrire)-------------------------------->|
+      |---(Se connecter)------------------------------>|
+      |---(Déposer annonce ressource)----------------->|
+      |---(Consulter marketplace)--------------------->|
+      |---(Contacter vendeur)------------------------->|
+      |                                               |
+      |<---(Valider entreprises)-----------------------|
+      |                                               |
+      |                                               |---(Modérer annonces)---->|
+      |                                               |---(Voir statistiques)--->|
+      |                                               |---(Générer rapports)--->|
+```
