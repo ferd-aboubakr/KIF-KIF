@@ -15,7 +15,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->enum('role', ['responsable_tpm', 'administrateur'])->default('responsable_tpm');
-            $table->foreignId('entreprise_id')->constrained('entreprises')->onDelete('cascade');
+            $table->enum('type', ['particulier', 'entreprise'])->default('particulier');
+            $table->foreignId('entreprise_id')->nullable()->constrained('entreprises')->onDelete('cascade');
+            $table->foreignId('particulier_id')->nullable()->constrained('particuliers')->onDelete('cascade');
             $table->timestamp('date_creation')->useCurrent();
             $table->rememberToken();
             $table->timestamps();

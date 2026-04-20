@@ -1,0 +1,143 @@
+@startuml
+!theme cerulean-outline
+
+left to right direction
+skinparam packageStyle rectangle
+
+title Diagramme de Cas d'Utilisation - Plateforme Kif-Kif (Version Hybride B2B/B2C)
+
+' Acteurs
+actor "Visiteur" as Visiteur #LightGray
+actor "Particulier" as Particulier #LightGreen
+actor "Responsable TPME" as Responsable #LightBlue
+actor "Administrateur" as Admin #LightCoral
+
+' Système
+rectangle "Plateforme Kif-Kif" {
+    
+    ' Use Cases Publics (Visiteur)
+    package "Accès Public" {
+        usecase "Consulter Marketplace" as UC_Consulter #LightYellow
+        usecase "Filtrer par Ville" as UC_FiltreVille
+        usecase "Filtrer par Secteur" as UC_FiltreSecteur
+        usecase "Voir Détails Annonce" as UC_VoirDetails
+    }
+    
+    ' Use Cases Authentification
+    package "Authentification" {
+        usecase "S'inscrire comme Particulier" as UC_InscrirePart #LightGreen
+        usecase "S'inscrire comme Entreprise" as UC_InscrireEnt #LightBlue
+        usecase "Se Connecter" as UC_Login
+        usecase "Valider ICE Entreprise" as UC_ValiderICE #LightCoral
+    }
+    
+    ' Use Cases Particulier
+    package "Espace Particulier" {
+        usecase "Contacter Propriétaire" as UC_Contacter #LightGreen
+        usecase "Voir Coordonnées Vendeur" as UC_Coords
+        usecase "Gérer Profil Personnel" as UC_ProfilPart
+        usecase "Historique Contacts" as UC_Historique
+    }
+    
+    ' Use Cases Entreprise
+    package "Espace Entreprise" {
+        usecase "Déposer Annonce" as UC_Deposer #LightBlue
+        usecase "Gérer Annonces" as UC_GererAnnonces
+        usecase "Voir Métriques Circulaires" as UC_Metriques
+        usecase "Gérer Transactions" as UC_TransactionsEnt
+        usecase "Voir Statistiques Industrielles" as UC_StatsIndustrielles
+    }
+    
+    ' Use Cases Administration
+    package "Administration" {
+        usecase "Modération Segmentée" as UC_Moderation #LightCoral
+        usecase "Valider Compte Entreprise" as UC_ValiderEnt
+        usecase "Rejeter Compte Entreprise" as UC_RejeterEnt
+        usecase "Modérer Annonces" as UC_ModererAnnonces
+        usecase "Analyser Statistiques B2B vs B2C" as UC_AnalyseStats
+        usecase "Gérer Catégories" as UC_GererCategories
+    }
+    
+    ' Use Cases Communs (Messagerie)
+    package "Messagerie" {
+        usecase "Envoyer Message" as UC_Message
+        usecase "Recevoir Notification" as UC_Notif
+    }
+}
+
+' Relations Visiteur
+Visiteur --> UC_Consulter
+Visiteur --> UC_FiltreVille
+Visiteur --> UC_FiltreSecteur
+Visiteur --> UC_VoirDetails
+Visiteur ..> UC_Login : <<include>>
+Visiteur ..> UC_InscrirePart : <<include>>
+Visiteur ..> UC_InscrireEnt : <<include>>
+
+' Relations Particulier
+Particulier --|> Visiteur : extends
+Particulier --> UC_InscrirePart
+Particulier --> UC_Contacter
+Particulier --> UC_Coords
+Particulier --> UC_ProfilPart
+Particulier --> UC_Historique
+Particulier --> UC_Message
+Particulier --> UC_Notif
+
+UC_InscrirePart ..> UC_Login : <<include>>
+
+' Relations Responsable TPME
+Responsable --|> Visiteur : extends
+Responsable --> UC_InscrireEnt
+Responsable --> UC_Deposer
+Responsable --> UC_GererAnnonces
+Responsable --> UC_Metriques
+Responsable --> UC_TransactionsEnt
+Responsable --> UC_StatsIndustrielles
+Responsable --> UC_Message
+Responsable --> UC_Notif
+Responsable --> UC_Contacter
+
+UC_InscrireEnt ..> UC_ValiderICE : <<include>>
+UC_InscrireEnt ..> UC_Login : <<include>>
+UC_Deposer ..> UC_ValiderICE : <<include>>
+
+' Relations Administrateur
+Admin --> UC_Moderation
+Admin --> UC_ValiderEnt
+Admin --> UC_RejeterEnt
+Admin --> UC_ValiderICE
+Admin --> UC_ModererAnnonces
+Admin --> UC_AnalyseStats
+Admin --> UC_GererCategories
+Admin --> UC_StatsIndustrielles
+
+' Relations entre Use Cases
+UC_Consulter ..> UC_FiltreVille : <<extend>>
+UC_Consulter ..> UC_FiltreSecteur : <<extend>>
+UC_Contacter ..> UC_Message : <<include>>
+UC_Deposer ..> UC_GererAnnonces : <<include>>
+UC_ValiderEnt ..> UC_Moderation : <<include>>
+UC_RejeterEnt ..> UC_Moderation : <<include>>
+
+' Notes
+note right of UC_Consulter
+  Accessible sans authentification
+  mais bouton "Contacter" redirige
+  vers connexion
+end note
+
+note right of UC_ValiderICE
+  Vérification manuelle de l'ICE
+  par l'administrateur pour
+  les comptes entreprise uniquement
+end note
+
+note bottom of UC_AnalyseStats
+  Analyse des échanges :
+  - B2B (Entreprise → Entreprise)
+  - B2C (Entreprise → Particulier)
+  - C2B (Particulier → Entreprise)
+end note
+
+@enduml

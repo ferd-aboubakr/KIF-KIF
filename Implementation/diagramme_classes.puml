@@ -1,0 +1,265 @@
+@startuml
+!theme cerulean-outline
+
+title Diagramme de Classes - Plateforme Kif-Kif (Version Hybride B2B/B2C)
+
+' Configuration
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+' ==================== CLASSES ====================
+
+class Entreprise {
+    - id: int
+    - nom: string
+    - ice: string
+    - secteur_activite: string
+    - ville: string
+    - email: string
+    - telephone: string
+    - statut_validation: enum
+    - date_creation: datetime
+    --
+    + sInscrire(): bool
+    + seConnecter(): bool
+    + mettreAJourProfil(): bool
+    + validerICE(): bool
+    + isValidee(): bool
+    + scopeValidees()
+    + scopeEnAttente()
+}
+
+class Particulier {
+    - id: int
+    - nom: string
+    - prenom: string
+    - ville: string
+    - telephone: string
+    - email: string
+    - date_inscription: datetime
+    --
+    + sinscrire(): bool
+    + mettreAJourProfil(): bool
+    + supprimerCompte(): bool
+}
+
+class User {
+    - id: int
+    - nom: string
+    - prenom: string
+    - email: string
+    - password: string
+    - role: enum
+    - type: enum
+    - entreprise_id: int
+    - particulier_id: int
+    - remember_token: string
+    - date_creation: datetime
+    --
+    + sAuthentifier(): bool
+    + modifierMotDePasse(): bool
+    + resetMotDePasse(): bool
+    + isAdministrateur(): bool
+    + isResponsableTPM(): bool
+    + isParticulier(): bool
+    + isEntreprise(): bool
+    + getAuthPassword(): string
+    + entreprise(): BelongsTo
+    + particulier(): BelongsTo
+    + transactionsAcheteur(): HasMany
+    + transactionsVendeur(): HasMany
+    + messagesEnvoyes(): HasMany
+    + messagesRecus(): HasMany
+    + notifications(): HasMany
+}
+
+class Ressource {
+    - id: int
+    - titre: string
+    - description: text
+    - type_ressource: enum
+    - quantite: decimal
+    - unite: string
+    - etat: string
+    - prix_unitaire: decimal
+    - localisation: string
+    - photos: array
+    - statut: enum
+    - date_publication: datetime
+    - entreprise_id: int
+    - categorie_id: int
+    --
+    + publierAnnonce(): bool
+    + modifierAnnonce(): bool
+    + archiverAnnonce(): bool
+    + supprimerAnnonce(): bool
+    + calculerImpactCO2(): float
+    + scopeActives(): Builder
+    + scopeParType(type: string): Builder
+    + scopeParVille(ville: string): Builder
+    + entreprise(): BelongsTo
+    + categorie(): BelongsTo
+    + transactions(): HasMany
+    + messages(): HasMany
+}
+
+class Transaction {
+    - id: int
+    - reference: string
+    - montant_total: decimal
+    - date_transaction: datetime
+    - statut: enum
+    - mode_paiement: string
+    - acheteur_id: int
+    - vendeur_id: int
+    - ressource_id: int
+    --
+    + creerTransaction(): bool
+    + validerTransaction(): bool
+    + annulerTransaction(): bool
+    + genererFacture(): string
+    + notifierParties(): bool
+    + genererReference(): string
+    + scopeValidees(): Builder
+    + scopeEnAttente(): Builder
+    + acheteur(): BelongsTo
+    + vendeur(): BelongsTo
+    + ressource(): BelongsTo
+    + messages(): HasMany
+}
+
+class Message {
+    - id: int
+    - contenu: text
+    - date_envoi: datetime
+    - statut_lecture: bool
+    - expediteur_id: int
+    - destinataire_id: int
+    - ressource_id: int
+    - transaction_id: int
+    --
+    + envoyerMessage(): bool
+    + marquerCommeLu(): bool
+    + supprimerMessage(): bool
+    + expediteur(): BelongsTo
+    + destinataire(): BelongsTo
+    + ressource(): BelongsTo
+    + transaction(): BelongsTo
+}
+
+class Categorie {
+    - id: int
+    - nom: string
+    - description: text
+    - icone: string
+    - parent_id: int
+    --
+    + ajouterCategorie(): bool
+    + modifierCategorie(): bool
+    + supprimerCategorie(): bool
+    + ressources(): HasMany
+    + parent(): BelongsTo
+    + enfants(): HasMany
+}
+
+class Notification {
+    - id: int
+    - titre: string
+    - message: text
+    - type_notification: enum
+    - date_creation: datetime
+    - lue: bool
+    - utilisateur_id: int
+    --
+    + envoyerNotification(): bool
+    + marquerCommeLue(): bool
+    + supprimerNotification(): bool
+    + scopeNonLues()
+    + utilisateur(): BelongsTo
+}
+
+class Statistique {
+    - id: int
+    - type_statistique: enum
+    - valeur: decimal
+    - periode: date
+    - region: string
+    - secteur_activite: string
+    - administrateur_id: int
+    --
+    + calculerVolumeTransactions(debut: date, fin: date): decimal
+    + calculerImpactEcologique(): float
+    + calculerDensiteIndustrielle(): array
+    + genererRapport(): array
+    + administrateur(): BelongsTo
+}
+
+' ==================== RELATIONS ====================
+
+' Héritage / Généralisation
+User <|-- Particulier : "profile via type"
+User <|-- Entreprise : "profile via type"
+
+' Associations avec multiplicités
+Entreprise "1" --> "0..*" Ressource : publie >
+Entreprise "1" --> "1..*" User : emploie >
+
+Particulier "1" --> "1" User : authentifie >
+
+User "1" --> "0..*" Transaction : achete >
+User "1" --> "0..*" Transaction : vend >
+User "1" --> "0..*" Message : envoie >
+User "1" --> "0..*" Message : recoit >
+User "1" --> "0..*" Notification : recoit >
+
+Ressource "1" --> "0..*" Transaction : implique >
+Ressource "1" --> "0..*" Message : genere >
+Ressource "0..*" --> "1" Categorie : appartient a >
+
+Transaction "1" --> "0..*" Message : lie >
+Transaction "0..*" --> "1" Ressource : concerne >
+
+Message "0..*" --> "1" User : expediteur
+Message "0..*" --> "1" User : destinataire
+Message "0..*" --> "0..1" Ressource : reference
+Message "0..*" --> "0..1" Transaction : lie a
+
+Categorie "0..*" --> "0..1" Categorie : parent >
+Categorie "1" --> "0..*" Categorie : enfants >
+
+Notification "0..*" --> "1" User : concerne >
+
+Statistique "0..*" --> "1" User : genere par >
+
+' Composition (diamant noir)
+Entreprise *-- "1..*" User : composition
+Transaction *-- "0..*" Message : composition
+
+
+' Notes explicatives
+note right of User
+  Type d'utilisateur :
+  - 'particulier' : accès B2C
+  - 'entreprise' : accès B2B
+  Role : 'responsable_tpm', 'administrateur'
+end note
+
+note bottom of Entreprise
+  Statut validation :
+  - 'en_attente' : inscription en cours
+  - 'validee' : ICE verifie
+  - 'rejetee' : ICE invalide
+end note
+
+note bottom of Transaction
+  Types d'echanges :
+  - B2B : Entreprise → Entreprise
+  - B2C : Entreprise → Particulier
+  - C2B : Particulier → Entreprise (rare)
+end note
+
+@enduml
