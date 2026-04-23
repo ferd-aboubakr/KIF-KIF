@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Entreprise;
+use App\Models\Particulier;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -51,7 +52,18 @@ class UserSeeder extends Seeder
         $entrepriseUser->assignRole('entreprise');
 
         // Create Particulier User
-        $particulier = User::firstOrCreate(
+        $particulierModel = Particulier::firstOrCreate(
+            ['email' => 'particulier@kifkif.ma'],
+            [
+                'nom' => 'Ahmed',
+                'prenom' => 'Benali',
+                'ville' => 'Casablanca',
+                'telephone' => '0522345678',
+                'email' => 'particulier@kifkif.ma',
+            ]
+        );
+
+        $particulierUser = User::updateOrCreate(
             ['email' => 'particulier@kifkif.ma'],
             [
                 'nom' => 'Ahmed',
@@ -59,9 +71,10 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role' => 'responsable_tpm',
                 'type' => 'particulier',
+                'particulier_id' => $particulierModel->id,
             ]
         );
-        $particulier->assignRole('particulier');
+        $particulierUser->assignRole('particulier');
 
         $this->command->info('Test users created successfully!');
         $this->command->info('====================================');
