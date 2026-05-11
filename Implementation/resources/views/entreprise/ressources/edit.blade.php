@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nouvelle Annonce - Kif-Kif</title>
+    <title>Modifier Annonce - Kif-Kif</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -38,7 +38,7 @@
                 <span class="material-symbols-outlined">inventory_2</span>
                 Mes Annonces
             </a>
-            <a href="{{ route('entreprise.ressources.create') }}" class="flex items-center gap-3 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-xl font-medium">
+            <a href="{{ route('entreprise.ressources.create') }}" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors">
                 <span class="material-symbols-outlined">add_circle</span>
                 Nouvelle Annonce
             </a>
@@ -76,7 +76,7 @@
                 <span class="material-symbols-outlined">inventory_2</span>
                 Mes Annonces
             </a>
-            <a href="{{ route('entreprise.ressources.create') }}" class="flex items-center gap-3 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-xl font-medium">
+            <a href="{{ route('entreprise.ressources.create') }}" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors">
                 <span class="material-symbols-outlined">add_circle</span>
                 Nouvelle Annonce
             </a>
@@ -105,8 +105,8 @@
         <header class="bg-white shadow-sm sticky top-0 z-40 hidden lg:block">
             <div class="px-8 py-4 flex items-center justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Nouvelle Annonce</h2>
-                    <p class="text-sm text-gray-500">Publier une nouvelle ressource</p>
+                    <h2 class="text-2xl font-bold text-gray-800">Modifier Annonce</h2>
+                    <p class="text-sm text-gray-500">Mettre à jour votre ressource</p>
                 </div>
                 <div class="flex items-center gap-4">
                     <a href="{{ route('entreprise.ressources.index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-medium">
@@ -135,7 +135,7 @@
 
             <!-- Form -->
             <section class="bg-white rounded-2xl shadow-sm p-6 lg:p-8">
-                <h3 class="text-xl font-semibold text-gray-800 mb-6">Informations de l'annonce</h3>
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">Modifier les informations</h3>
 
                 @if (session('error'))
                     <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
@@ -143,13 +143,14 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('entreprise.ressources.store') }}" enctype="multipart/form-data" class="space-y-6">
+                <form method="POST" action="{{ route('entreprise.ressources.update', request('id')) }}" enctype="multipart/form-data" class="space-y-6">
                     @csrf
+                    @method('PUT')
 
                     <!-- Title -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Titre de l'annonce *</label>
-                        <input type="text" name="titre" required value="{{ old('titre') }}" 
+                        <input type="text" name="titre" required value="{{ $ressource->titre }}" 
                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                                placeholder="Ex: Matériaux de construction">
                     </div>
@@ -157,66 +158,68 @@
                     <!-- Description -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
-                        <textarea name="description" required rows="4" value="{{ old('description') }}"
+                        <textarea name="description" required rows="4"
                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                                  placeholder="Décrivez votre ressource en détail..."></textarea>
+                                  placeholder="Décrivez votre ressource en détail...">{{ $ressource->description }}</textarea>
                     </div>
 
                     <!-- Price and Location -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Prix unitaire (DH) *</label>
-                            <input type="number" name="prix_unitaire" required min="0" step="0.01" value="{{ old('prix_unitaire') }}"
+                            <input type="number" name="prix_unitaire" required min="0" step="0.01" value="{{ $ressource->prix_unitaire }}"
                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                                    placeholder="0.00">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Localisation *</label>
-                            <input type="text" name="localisation" required value="{{ old('localisation') }}"
+                            <input type="text" name="localisation" required value="{{ $ressource->localisation }}"
                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                                    placeholder="Ex: Casablanca">
                         </div>
                     </div>
 
-                    <!-- Category and Quantity -->
+                    <!-- Type and Quantity -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie *</label>
-                            <select name="categorie_id" required
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Type de ressource *</label>
+                            <select name="type_ressource" required
                                     class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all">
-                                <option value="">Sélectionner une catégorie</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ old('categorie_id') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->nom }}
-                                    </option>
-                                @endforeach
+                                <option value="matiere_premiere" {{ $ressource->type_ressource === 'matiere_premiere' ? 'selected' : '' }}>Matière première</option>
+                                <option value="sous_produit" {{ $ressource->type_ressource === 'sous_produit' ? 'selected' : '' }}>Sous-produit</option>
+                                <option value="machine" {{ $ressource->type_ressource === 'machine' ? 'selected' : '' }}>Machine</option>
+                                <option value="espace_stockage" {{ $ressource->type_ressource === 'espace_stockage' ? 'selected' : '' }}>Espace de stockage</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Quantité disponible *</label>
-                            <input type="number" name="quantite" required min="1" value="{{ old('quantite') ?? 1 }}"
+                            <input type="number" name="quantite" required min="0" value="{{ $ressource->quantite }}"
                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                                    placeholder="1">
                         </div>
                     </div>
 
-                    <!-- Photos -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Photos</label>
-                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-emerald-400 transition-colors">
-                            <span class="material-symbols-outlined text-4xl text-gray-400">add_photo_alternate</span>
-                            <p class="text-gray-600 mt-2">Cliquez pour ajouter des photos</p>
-                            <p class="text-sm text-gray-500">PNG, JPG jusqu'à 10MB</p>
-                            <input type="file" name="photos[]" multiple accept="image/*" class="hidden">
+                    <!-- Unit and State -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Unité *</label>
+                            <input type="text" name="unite" required value="{{ $ressource->unite }}"
+                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                                   placeholder="Ex: kg, litres, unités">
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">Vous pouvez ajouter plusieurs photos pour mieux présenter votre ressource</p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">État *</label>
+                            <input type="text" name="etat" required value="{{ $ressource->etat }}"
+                                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                                   placeholder="Ex: neuf, bon état, usagé">
+                        </div>
                     </div>
 
                     <!-- Submit Buttons -->
                     <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t">
                         <button type="submit" class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors font-medium">
-                            <span class="material-symbols-outlined">publish</span>
-                            Publier l'annonce
+                            <span class="material-symbols-outlined">save</span>
+                            Enregistrer les modifications
                         </button>
                         <a href="{{ route('entreprise.ressources.index') }}" class="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-medium">
                             <span class="material-symbols-outlined">cancel</span>
@@ -226,30 +229,21 @@
                 </form>
             </section>
 
-            <!-- Help Section -->
-            <section class="mt-8 bg-blue-50 rounded-2xl p-6">
-                <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-blue-600">info</span>
-                    Conseils pour une annonce efficace
+            <!-- Danger Zone -->
+            <section class="mt-8 bg-red-50 rounded-2xl p-6">
+                <h4 class="font-semibold text-red-800 mb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined">warning</span>
+                    Zone de danger
                 </h4>
-                <ul class="space-y-2 text-sm text-gray-600">
-                    <li class="flex items-start gap-2">
-                        <span class="material-symbols-outlined text-blue-600 text-lg mt-0.5">check_circle</span>
-                        <span>Utilisez des photos claires et de bonne qualité</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="material-symbols-outlined text-blue-600 text-lg mt-0.5">check_circle</span>
-                        <span>Décrivez précisément l'état et les caractéristiques de votre ressource</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="material-symbols-outlined text-blue-600 text-lg mt-0.5">check_circle</span>
-                        <span>Fixez un prix compétitif selon le marché</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="material-symbols-outlined text-blue-600 text-lg mt-0.5">check_circle</span>
-                        <span>Soyez réactif aux messages des intéressés</span>
-                    </li>
-                </ul>
+                <p class="text-red-700 mb-4">La suppression de cette annonce est irréversible. Toutes les données seront perdues.</p>
+                <form method="POST" action="{{ route('entreprise.ressources.destroy', $ressource->id ?? $ressource) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est irréversible.')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium">
+                        <span class="material-symbols-outlined">delete</span>
+                        Supprimer cette annonce
+                    </button>
+                </form>
             </section>
         </div>
     </main>
@@ -273,25 +267,6 @@
         mobileMenuBtn?.addEventListener('click', toggleSidebar);
         closeMenuBtn?.addEventListener('click', closeSidebar);
         mobileOverlay?.addEventListener('click', closeSidebar);
-
-        // File upload handling
-        const fileInput = document.querySelector('input[type="file"]');
-        const uploadArea = fileInput?.parentElement;
-
-        if (uploadArea && fileInput) {
-            uploadArea.addEventListener('click', () => fileInput.click());
-
-            fileInput.addEventListener('change', (e) => {
-                const files = e.target.files;
-                if (files.length > 0) {
-                    uploadArea.innerHTML = `
-                        <span class="material-symbols-outlined text-4xl text-emerald-600">check_circle</span>
-                        <p class="text-emerald-600 font-medium mt-2">${files.length} photo(s) sélectionnée(s)</p>
-                        <p class="text-sm text-gray-500">Cliquez pour modifier</p>
-                    `;
-                }
-            });
-        }
     </script>
 </body>
 </html>

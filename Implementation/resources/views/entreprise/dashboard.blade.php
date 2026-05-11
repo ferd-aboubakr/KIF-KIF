@@ -5,96 +5,252 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - {{ $entreprise->nom }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <nav class="bg-blue-600 text-white p-4">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold">Kif-Kif - Espace Entreprise</h1>
-            <div class="flex items-center gap-4">
-                <span>{{ $entreprise->nom }}</span>
-                <span class="px-2 py-1 rounded text-sm {{ $entreprise->statut_validation === 'validee' ? 'bg-green-500' : 'bg-yellow-500' }}">
-                    {{ $entreprise->statut_validation }}
-                </span>
-                <form method="POST" action="{{ route('entreprise.logout') }}">
-                    @csrf
-                    <button type="submit" class="text-sm underline">Déconnexion</button>
-                </form>
-            </div>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Mobile Header -->
+    <header class="lg:hidden bg-white shadow-sm sticky top-0 z-50">
+        <div class="px-4 py-3 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-emerald-600">Kif-Kif Entreprise</h1>
+            <button id="mobile-menu-btn" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
         </div>
-    </nav>
+    </header>
 
-    <div class="max-w-6xl mx-auto p-4">
-        @if (session('success'))
-            <div class="bg-green-100 text-green-700 p-3 rounded mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if (session('error'))
-            <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        <div class="grid grid-cols-3 gap-4 mb-6">
-            <div class="bg-white p-4 rounded shadow">
-                <h3 class="text-gray-600 text-sm">Annonces actives</h3>
-                <p class="text-3xl font-bold text-blue-600">{{ $stats['annonces_actives'] }}</p>
-            </div>
-            <div class="bg-white p-4 rounded shadow">
-                <h3 class="text-gray-600 text-sm">Total annonces</h3>
-                <p class="text-3xl font-bold text-green-600">{{ $stats['total_annonces'] }}</p>
-            </div>
-            <div class="bg-white p-4 rounded shadow">
-                <h3 class="text-gray-600 text-sm">Transactions</h3>
-                <p class="text-3xl font-bold text-purple-600">{{ $stats['transactions'] }}</p>
-            </div>
+    <!-- Desktop Sidebar -->
+    <aside class="fixed left-0 top-0 h-full w-64 bg-white shadow-xl z-50 hidden lg:block">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-emerald-600">Kif-Kif</h1>
+            <p class="text-xs text-gray-500 uppercase tracking-wider mt-1">Espace Entreprise</p>
         </div>
+        <nav class="mt-8 px-4 space-y-2">
+            <a href="{{ route('entreprise.dashboard') }}" class="flex items-center gap-3 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-xl font-medium">
+                <span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+            <a href="{{ route('entreprise.ressources.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors">
+                <span class="material-symbols-outlined">inventory_2</span>
+                Mes Annonces
+            </a>
+            <a href="{{ route('entreprise.ressources.create') }}" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors">
+                <span class="material-symbols-outlined">add_circle</span>
+                Nouvelle Annonce
+            </a>
+            <a href="{{ route('marketplace.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors">
+                <span class="material-symbols-outlined">storefront</span>
+                Marketplace
+            </a>
+        </nav>
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors">
+                    <span class="material-symbols-outlined">logout</span>
+                    Déconnexion
+                </button>
+            </form>
+        </div>
+    </aside>
 
-        <div class="bg-white p-4 rounded shadow mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-semibold">Mes Annonces Récentes</h2>
-                <a href="{{ route('entreprise.ressources.create') }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                    + Nouvelle annonce
-                </a>
+    <!-- Mobile Sidebar -->
+    <aside id="mobile-sidebar" class="fixed left-0 top-0 h-full w-64 bg-white shadow-xl z-50 transform -translate-x-full transition-transform lg:hidden">
+        <div class="p-6 flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-emerald-600">Kif-Kif</h1>
+            <button id="close-menu-btn" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <p class="text-xs text-gray-500 uppercase tracking-wider px-6 mt-1">Espace Entreprise</p>
+        <nav class="mt-8 px-4 space-y-2">
+            <a href="{{ route('entreprise.dashboard') }}" class="flex items-center gap-3 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-xl font-medium">
+                <span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+            <a href="{{ route('entreprise.ressources.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors">
+                <span class="material-symbols-outlined">inventory_2</span>
+                Mes Annonces
+            </a>
+            <a href="{{ route('entreprise.ressources.create') }}" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors">
+                <span class="material-symbols-outlined">add_circle</span>
+                Nouvelle Annonce
+            </a>
+            <a href="{{ route('marketplace.index') }}" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors">
+                <span class="material-symbols-outlined">storefront</span>
+                Marketplace
+            </a>
+        </nav>
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors">
+                    <span class="material-symbols-outlined">logout</span>
+                    Déconnexion
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Mobile Overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 p-4 lg:p-8 pt-16 lg:pt-8">
+        <!-- Header -->
+        <header class="bg-white shadow-sm sticky top-0 z-40 hidden lg:block">
+            <div class="px-8 py-4 flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                    <p class="text-sm text-gray-500">{{ $entreprise->nom }}</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="px-3 py-1 rounded-full text-sm font-medium {{ $entreprise->statut_validation === 'validee' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
+                        {{ $entreprise->statut_validation === 'validee' ? 'Validée' : 'En attente' }}
+                    </span>
+                    <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-emerald-600">business</span>
+                    </div>
+                    <form method="POST" action="{{ route('logout') }}" class="inline">
+                        @csrf
+                        <button type="submit" class="p-2 hover:bg-red-100 rounded-full transition-colors">
+                            <span class="material-symbols-outlined text-red-600">logout</span>
+                        </button>
+                    </form>
+                </div>
             </div>
+        </header>
 
-            @if ($annonces->count() > 0)
-                <table class="w-full">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="text-left p-3">Titre</th>
-                            <th class="text-left p-3">Type</th>
-                            <th class="text-left p-3">Prix</th>
-                            <th class="text-left p-3">Statut</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($annonces as $annonce)
-                            <tr class="border-t">
-                                <td class="p-3">{{ $annonce->titre }}</td>
-                                <td class="p-3">{{ $annonce->type_ressource }}</td>
-                                <td class="p-3">{{ $annonce->prix_unitaire }} DH</td>
-                                <td class="p-3">
-                                    <span class="px-2 py-1 rounded text-sm {{ $annonce->statut === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700' }}">
-                                        {{ $annonce->statut }}
-                                    </span>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                <div class="mt-4 text-right">
-                    <a href="{{ route('entreprise.ressources.index') }}" class="text-blue-600 hover:underline">
-                        Voir toutes les annonces →
+        <!-- Content -->
+        <div class="p-4 lg:p-8">
+            @if (session('success'))
+                <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700">
+                    {{ session('success') }}
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            <!-- Stats Grid -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <span class="material-symbols-outlined text-blue-600">campaign</span>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800">{{ $stats['annonces_actives'] }}</p>
+                    <p class="text-sm text-gray-500 mt-1">Annonces actives</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <span class="material-symbols-outlined text-green-600">inventory</span>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800">{{ $stats['total_annonces'] }}</p>
+                    <p class="text-sm text-gray-500 mt-1">Total annonces</p>
+                </div>
+
+            </section>
+
+            <!-- Recent Ads -->
+            <section class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <div class="p-6 border-b flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-800">Annonces récentes</h3>
+                    <a href="{{ route('entreprise.ressources.index') }}" class="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+                        Voir tout
                     </a>
                 </div>
-            @else
-                <p class="text-gray-500 text-center py-8">
-                    Aucune annonce pour le moment. 
-                    <a href="{{ route('entreprise.ressources.create') }}" class="text-blue-600">Créer une annonce</a>
-                </p>
-            @endif
+                <div class="p-6">
+                    @if(isset($recent_ressources) && $recent_ressources->count() > 0)
+                        <div class="space-y-4">
+                            @foreach($recent_ressources->take(5) as $ressource)
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-emerald-600">inventory_2</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-gray-800">{{ $ressource->titre }}</h4>
+                                            <p class="text-sm text-gray-500">{{ $ressource->prix_unitaire }} DH • {{ $ressource->localisation }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium {{ $ressource->statut === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700' }}">
+                                            {{ $ressource->statut === 'active' ? 'Active' : 'Inactive' }}
+                                        </span>
+                                        <a href="{{ route('entreprise.ressources.edit', $ressource->id) }}" class="text-emerald-600 hover:text-emerald-700">
+                                            <span class="material-symbols-outlined">edit</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-8">
+                            <span class="material-symbols-outlined text-4xl text-gray-300">inventory_2</span>
+                            <p class="text-gray-500 mt-2">Aucune annonce récente</p>
+                            <a href="{{ route('entreprise.ressources.create') }}" class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors font-medium">
+                                <span class="material-symbols-outlined">add_circle</span>
+                                Créer une annonce
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="mt-8 bg-white rounded-2xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Actions rapides</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <a href="{{ route('entreprise.ressources.create') }}" class="flex items-center gap-3 p-4 bg-emerald-50 rounded-xl hover:bg-emerald-100 transition-colors">
+                        <span class="material-symbols-outlined text-emerald-600 text-2xl">add_circle</span>
+                        <div>
+                            <p class="font-medium text-gray-800">Nouvelle annonce</p>
+                            <p class="text-sm text-gray-600">Ajouter une nouvelle ressource</p>
+                        </div>
+                    </a>
+
+                    <a href="{{ route('entreprise.ressources.index') }}" class="flex items-center gap-3 p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
+                        <span class="material-symbols-outlined text-blue-600 text-2xl">inventory_2</span>
+                        <div>
+                            <p class="font-medium text-gray-800">Mes annonces</p>
+                            <p class="text-sm text-gray-600">Gérer mes ressources</p>
+                        </div>
+                    </a>
+                </div>
+            </section>
         </div>
-    </div>
+    </main>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const closeMenuBtn = document.getElementById('close-menu-btn');
+        const mobileSidebar = document.getElementById('mobile-sidebar');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+
+        const toggleSidebar = () => {
+            mobileSidebar.classList.toggle('-translate-x-full');
+            mobileOverlay.classList.toggle('hidden');
+        };
+
+        const closeSidebar = () => {
+            mobileSidebar.classList.add('-translate-x-full');
+            mobileOverlay.classList.add('hidden');
+        };
+
+        mobileMenuBtn?.addEventListener('click', toggleSidebar);
+        closeMenuBtn?.addEventListener('click', closeSidebar);
+        mobileOverlay?.addEventListener('click', closeSidebar);
+    </script>
 </body>
 </html>

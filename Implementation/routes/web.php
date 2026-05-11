@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\Entreprise\AuthController;
 use App\Http\Controllers\Entreprise\DashboardController;
 use App\Http\Controllers\Entreprise\RessourceController;
@@ -40,11 +41,14 @@ Route::prefix('entreprise')->group(function () {
 });
 
 // Protected Entreprise Routes with Spatie role check
-Route::middleware(['auth', 'entreprise'])->prefix('entreprise')->group(function () {
+Route::middleware(['auth', 'entreprise', 'App\Http\Middleware\EnsureEntrepriseValidated::class'])->prefix('entreprise')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('entreprise.dashboard');
     Route::get('/ressources', [RessourceController::class, 'index'])->name('entreprise.ressources.index');
     Route::get('/ressources/create', [RessourceController::class, 'create'])->name('entreprise.ressources.create');
     Route::post('/ressources', [RessourceController::class, 'store'])->name('entreprise.ressources.store');
+    Route::get('/ressources/{id}/edit', [RessourceController::class, 'edit'])->name('entreprise.ressources.edit');
+    Route::put('/ressources/{id}', [RessourceController::class, 'update'])->name('entreprise.ressources.update');
+    Route::delete('/ressources/{id}', [RessourceController::class, 'destroy'])->name('entreprise.ressources.destroy');
 });
 
 // Particulier routes with Spatie role check
@@ -60,6 +64,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/entreprises', [AdminController::class, 'entreprises'])->name('admin.entreprises');
     Route::post('/entreprises/{id}/valider', [AdminController::class, 'validerEntreprise'])->name('admin.entreprises.valider');
     Route::post('/entreprises/{id}/rejeter', [AdminController::class, 'rejeterEntreprise'])->name('admin.entreprises.rejeter');
+    Route::post('/entreprises/{id}/suspendre', [AdminController::class, 'suspendreEntreprise'])->name('admin.entreprises.suspendre');
+    Route::post('/entreprises/{id}/reactiver', [AdminController::class, 'reactiverEntreprise'])->name('admin.entreprises.reactiver');
+    Route::delete('/entreprises/{id}', [AdminController::class, 'deleteEntreprise'])->name('admin.entreprises.delete');
+    Route::get('/profile', [AdminController::class, 'profile'])->name('admin.profile');
+    Route::put('/profile', [AdminController::class, 'updateProfile'])->name('admin.profile.update');
 });
 
 require __DIR__.'/auth.php';

@@ -14,10 +14,10 @@ class DashboardRedirectController extends Controller
             
             if ($user->hasRole('admin')) {
                 return redirect()->route('admin.dashboard');
-            } elseif ($user->hasRole('entreprise')) {
-                return redirect()->route('entreprise.dashboard');
             } elseif ($user->hasRole('particulier')) {
                 return redirect()->route('particulier.dashboard');
+            } elseif ($user->hasRole('entreprise')) {
+                return redirect()->route('entreprise.dashboard');
             }
         }
         

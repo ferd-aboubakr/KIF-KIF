@@ -48,4 +48,14 @@ class Entreprise extends Model
     {
         return $query->where('statut_validation', 'en_attente');
     }
+
+    public function scopeSuspendues($query)
+    {
+        return $query->where('statut_validation', 'suspendue');
+    }
+
+    public function isSuspendue(): bool
+    {
+        return $this->statut_validation === 'suspendue';
+    }
 }

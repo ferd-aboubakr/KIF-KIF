@@ -14,12 +14,8 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
-        'nom',
-        'prenom',
         'email',
         'password',
-        'role',
-        'type',
         'entreprise_id',
         'particulier_id',
     ];
@@ -50,54 +46,19 @@ class User extends Authenticatable
         return $this->hasMany(Ressource::class);
     }
 
-    public function transactionsAcheteur(): HasMany
-    {
-        return $this->hasMany(Transaction::class, 'acheteur_id');
-    }
-
-    public function transactionsVendeur(): HasMany
-    {
-        return $this->hasMany(Transaction::class, 'vendeur_id');
-    }
-
-    public function messagesEnvoyes(): HasMany
-    {
-        return $this->hasMany(Message::class, 'expediteur_id');
-    }
-
-    public function messagesRecus(): HasMany
-    {
-        return $this->hasMany(Message::class, 'destinataire_id');
-    }
-
-    public function notifications(): HasMany
-    {
-        return $this->hasMany(Notification::class);
-    }
-
-    public function statistiques(): HasMany
-    {
-        return $this->hasMany(Statistique::class, 'administrateur_id');
-    }
-
     public function isAdministrateur(): bool
     {
-        return $this->role === 'administrateur';
-    }
-
-    public function isResponsableTPM(): bool
-    {
-        return $this->role === 'responsable_tpm';
+        return $this->hasRole('admin');
     }
 
     public function isParticulier(): bool
     {
-        return $this->type === 'particulier';
+        return $this->hasRole('particulier');
     }
 
     public function isEntreprise(): bool
     {
-        return $this->type === 'entreprise';
+        return $this->hasRole('entreprise');
     }
 
     public function getAuthPassword()

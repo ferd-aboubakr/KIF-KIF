@@ -43,16 +43,6 @@ class Ressource extends Model
         return $this->belongsTo(Categorie::class);
     }
 
-    public function transactions(): HasMany
-    {
-        return $this->hasMany(Transaction::class);
-    }
-
-    public function messages(): HasMany
-    {
-        return $this->hasMany(Message::class);
-    }
-
     public function calculerImpactCO2(): float
     {
         return $this->quantite * 0.5;
